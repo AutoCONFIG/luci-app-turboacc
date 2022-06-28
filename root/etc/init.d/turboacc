@@ -51,7 +51,7 @@ start(){
 		sysctl -w net.ipv4.tcp_congestion_control="cubic"
 	fi
 
-		/etc/init.d/firewall restart >"/dev/null" 2>&1
+	/etc/init.d/firewall restart >"/dev/null" 2>&1
 }
 
 stop(){
@@ -70,7 +70,7 @@ stop(){
 		/etc/init.d/shortcut-fe stop 2>"/dev/null"
 	}
 
-		/etc/init.d/firewall restart >"/dev/null" 2>&1
+	/etc/init.d/firewall restart >"/dev/null" 2>&1
 }
 
 restart(){
