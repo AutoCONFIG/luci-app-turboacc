@@ -4,6 +4,9 @@ msgstr "Turbo ACC 网络加速"
 msgid "Turbo ACC Acceleration Settings"
 msgstr "Turbo ACC 网络加速设置"
 
+msgid "Opensource Flow Offloading driver (Fast Path), only for x86 target system"
+msgstr "开源流量分载驱动 (快速转发)，仅适用于x86目标系统"
+
 msgid "Shortcut-FE flow offloading"
 msgstr "Shortcut-FE 流量分载"
 
