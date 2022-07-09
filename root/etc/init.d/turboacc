@@ -8,15 +8,34 @@ STOP=10
 EXTRA_COMMANDS="check_status"
 EXTRA_HELP="	check_status Check running status of utils"
 
+restart_utils="true"
+
 inital_conf(){
 	config_load "turboacc"
+	config_get "sw_flow" "config" "sw_flow" "0"
+	config_get "hw_flow" "config" "hw_flow" "0"
 	config_get "sfe_flow" "config" "sfe_flow" "0"
 	config_get "bbr_cca" "config" "bbr_cca" "0"
 	config_get "fullcone_nat" "config" "fullcone_nat" "0"
 
-	[ -e "/lib/modules/$(uname -r)/shortcut-fe-cm.ko" ] && sfe_flow="0"
+	[ -e "/lib/modules/$(uname -r)/mtkhnat.ko" ] && { sw_flow="0"; hw_flow="1"; }
+	[ ! -e "/lib/modules/$(uname -r)/xt_FLOWOFFLOAD.ko" ] && { sw_flow="0"; hw_flow="0"; }
+	[ ! -e "/lib/modules/$(uname -r)/shortcut-fe-cm.ko" ] && sfe_flow="0"
 	[ ! -e "/lib/modules/$(uname -r)/tcp_bbr.ko" ] && bbr_cca="0"
 	[ ! -e "/lib/modules/$(uname -r)/xt_FULLCONENAT.ko" ] && fullcone_nat="0"
+}
+
+load_sfe() {
+	local kernel_version=$(uname -r)
+
+	[ -e "/lib/modules/$kernel_version/shortcut-fe-cm.ko" ] && modprobe shortcut-fe-cm && echo 1 && return
+	
+	[ -e "/lib/modules/$kernel_version/fast-classifier.ko" ] && modprobe fast-classifier
+}
+
+unload_sfe() {
+	[ -d /sys/module/shortcut_fe_cm ] && rmmod shortcut_fe_cm 
+	[ -d /sys/module/fast_classifier ] && rmmod fast_classifier
 }
 
 start(){
@@ -26,7 +45,7 @@ start(){
 	uci commit firewall
 
 	[ "${sfe_flow}" -eq "1" ] && {
-		/etc/init.d/shortcut-fe start
+		load_sfe
 	}
 
 	if [ "${bbr_cca}" -eq "1" ];  then
@@ -35,7 +54,9 @@ start(){
 		sysctl -w net.ipv4.tcp_congestion_control="cubic"
 	fi
 
-	/etc/init.d/firewall restart >"/dev/null" 2>&1
+	if [ "${restart_utils}" = "true" ]; then
+		/etc/init.d/firewall restart >"/dev/null" 2>&1
+	fi
 }
 
 stop(){
@@ -44,23 +65,27 @@ stop(){
 	uci set firewall.@defaults[0].fullcone="${fullcone_nat}"
 	uci commit firewall
 
-	[ "${sfe_flow}" -eq "1" ] || {
-		/etc/init.d/shortcut-fe stop 2>"/dev/null"
-	}
+	unload_sfe
 
-	/etc/init.d/firewall restart >"/dev/null" 2>&1
+	if [ "${restart_utils}" = "true" ]; then
+		/etc/init.d/firewall restart >"/dev/null" 2>&1
+	fi
 }
 
 restart(){
+	restart_utils="false"
+
 	stop
 	start
+
+	/etc/init.d/firewall restart >"/dev/null" 2>&1
 }
 
 check_status(){
 	case "$1" in
 	"fastpath")
-		if [ -e /sys/sfe_ipv4/debug_dev ]; then
-			echo -n "Shortcut-FE"
+		if [ -n "$(lsmod | grep shortcut_fe_cm)" ]; then
+			echo -n "Shortcut-FE ECM"
 			exit 0
 		else
 			exit 1

@@ -8,6 +8,7 @@ function index()
 	page = entry({"admin", "network", "turboacc"}, cbi("turboacc"), _("Turbo ACC Center"), 101)
 	page.i18n = "turboacc"
 	page.dependent = true
+	
 	entry({"admin", "network", "turboacc", "status"}, call("action_status"))
 end
 
@@ -28,6 +29,6 @@ function action_status()
 	luci.http.write_json({
 		fastpath_state = fastpath_status(),
 		fullconenat_state = fullconenat_status(),
-		bbr_state = bbr_status(),
+		bbr_state = bbr_status()
 	})
 end

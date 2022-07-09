@@ -1,7 +1,7 @@
 # SPDX-Identifier-License: GPL-3.0-only
 #
-# Copyright (C) 2018 Lean <coolsnowwolf@gmail.com>
-# Copyright (C) 2019-2021 ImmortalWrt.org
+# Copyright (C) 2022 Lean <coolsnowwolf@gmail.com>
+# Copyright (C) 2019-2022 ImmortalWrt.org
 
 include $(TOPDIR)/rules.mk
 
@@ -9,12 +9,13 @@ PKG_NAME:=luci-app-turboacc
 PKG_RELEASE:=$(COMMITCOUNT)
 
 PKG_LICENSE:=GPL-3.0-only
-PKG_MAINTAINER:=Tianling Shen <cnsztl@immortalwrt.org>
+PKG_MAINTAINER:=Tianling Shen <cnsztl@immortalwrt.org> & Lean <coolsnowwolf@gmail.com>
 
-PKG_CONFIG_DEPENDS:=CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_BBR_CCA \
+PKG_CONFIG_DEPENDS:= \
+	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_BBR_CCA \
 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_SHORTCUT_FE_CM
 
-LUCI_TITLE:=LuCI support for Shortcut-FE
+LUCI_TITLE:=LuCI support for Flow Offload / Shortcut-FE
 LUCI_DEPENDS:=+PACKAGE_$(PKG_NAME)_INCLUDE_BBR_CCA:kmod-tcp-bbr \
 	+PACKAGE_$(PKG_NAME)_INCLUDE_SHORTCUT_FE_CM:kmod-shortcut-fe-cm
 LUCI_PKGARCH:=all
